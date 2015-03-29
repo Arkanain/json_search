@@ -1,8 +1,20 @@
+= JSON searching
+
 Project implement basic ActiveRecord and ActiveRelation functionality for JSON files as DB.
 
-<p>What you need to do it's just add custom model for JSON file to app/services, inherit it from Ng::ActiveRecord and add 'attr_available' for all field which you have in JSON file</p>
-<p>After that you will be able to use standart methods like - all, where, matches and they will work like default methods in ActiveRecord</p>
-<p>You should keep in mind that methods 'where' support inclusive searching and negative searching(for that type of searching you need just add '-' character before word or words)</p>
-<p>Web interface include two possible type of searching - Global searching and Field searching.</p>
-<p>First one(Global searching) - will be search by all fields in json file</p>
-<p>Second one(Field searching) - this is more complex. it allow you to include negative searching and searching in specified fields</p>
+What you need to do it's just add custom model for JSON file to <tt>app/services</tt>, inherit it from <tt>Ng::ActiveRecord</tt> and add <tt>attr_available</tt> for all field which you have in JSON file:
+
+  class Language < Ng::ActiveRecord
+    attr_available :name, :type, :designed_by
+  end
+
+After that you will be able to use standart methods like - <tt>all</tt>, <tt>where</tt>, <tt>matches</tt> and they will work like default methods in ActiveRecord (other methods still in progress).
+
+You should keep in mind that method <tt>where</tt> support:
+* Inclusive searching(Full Designed By value is - Thomas Eugene Kurtz, but it quite enough just type - Thomas Eugene and you will take same result).
+* Negative searching(For that type of searching you need just add '-' character before word or words and all matches will be excluded from results).
+  
+Web interface include two possible type of searching:
+* Global searching - Will be search by all fields in JSON file.
+* Field searching - This search is more complex. It allow you to include negative searching and searching in specified fields. 
+  
