@@ -1,0 +1,24 @@
+%h1
+  Languages
+
+#filter
+  = render 'filter'
+
+%table.list.size-10
+  %tbody.size-10
+    %tr.size-10
+      %th.size-2
+        Name
+      %th.size-4
+        Type
+      %th.size-3
+        Designed by
+
+    - @languages.each do |language|
+      %tr.size-10
+        %td.size-2
+          = language.name
+        %td.size-4
+          = language.type
+        %td.size-3
+          = language.designed_by

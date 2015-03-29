@@ -1,0 +1,53 @@
+.size-10
+  .size-1.column
+    = radio_button_tag :filter_type, 'global', true
+    = label_tag :filter_type, 'Global searching'
+  .size-1.column
+    = radio_button_tag :filter_type, 'field', false
+    = label_tag :filter_type, 'Field searching'
+
+.size-10
+  = form_tag root_path, method: :get do
+    #global.size-3.left.column
+      .size-10
+        = label_tag :query_string, "By all fields"
+      .size-10
+        = text_field_tag :query_string, params[:query_string]
+
+    #field.size-5.left.column
+      .name.size-3.left
+        = label_tag :name
+        = text_field_tag :name, params[:name]
+      .type.size-3.left
+        = label_tag :type
+        = text_field_tag :type, params[:type]
+      .designed_by.size-4.left
+        = label_tag :designed_by
+        = text_field_tag :designed_by, params[:designed_by]
+
+    .size-1.left.column
+      = submit_tag :filter, class: 'button', style: 'margin-top: 19px;'
+
+:javascript
+  $(document).on('click', 'input:radio', function(event) {
+    switch(event.target.value) {
+      case 'global':
+        $('#global').show();
+        $('#field').hide();
+        $('#field input').val('');
+        break;
+      case 'field':
+        $('#global').hide();
+        $('#field').show();
+        $('#global input').val('');
+
+        break;
+    }
+  });
+
+  if(#{params[:name].present? || params[:type].present? || params[:designed_by].present?}) {
+    $("input:radio[value='field']").click();
+  }
+  else {
+    $("input:radio[value='global']").click();
+  }
