@@ -1,7 +1,0 @@
-development:
-  adapter: postgresql
-  encoding: unicode
-  host: localhost
-  database: data_json_development
-  pool: 5
-  username: yurig
