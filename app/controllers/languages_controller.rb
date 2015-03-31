@@ -8,4 +8,8 @@ class LanguagesController < ApplicationController
     @languages = @languages.where(type: params[:type]) if params[:type].present?
     @languages = @languages.where(designed_by: params[:designed_by]) if params[:designed_by].present?
   end
+
+  def show
+    @language = Language.find(params[:id])
+  end
 end

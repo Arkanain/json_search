@@ -1,4 +1,4 @@
-module Ng
+module ORM
   class ActiveRecord
     def initialize(hash)
       hash.map { |key, value| send("#{key}=", value) }
@@ -6,20 +6,30 @@ module Ng
 
     class << self
       def all
-        Ng::ActiveRelation.new(self, json_table)
+        ORM::ActiveRelation.new(self, json_table)
+      end
+
+      def find(id)
+        obj = json_table.find { |e| e[:id] == id.to_i }
+
+        new(obj)
       end
 
       def where(hash, collection = nil)
         obj = collection || json_table
 
         hash.each do |key, value|
-          negative = value.first == '-'
-          temp_value = negative ? value[1..value.length] : value
+          if value.is_a?(String)
+            negative = value.first == '-'
+            temp_value = negative ? value[1..value.length] : value
 
-          obj = obj.select { |e| negative ^ e[key].downcase.include?(temp_value.downcase) }
+            obj = obj.select { |e| negative ^ e[key].downcase.include?(temp_value.downcase) }
+          else
+            obj = obj.select { |e| e[key] == value }
+          end
         end
 
-        Ng::ActiveRelation.new(self, obj)
+        ORM::ActiveRelation.new(self, obj)
       end
 
       def matches(string, fields, collection = nil)
@@ -39,26 +49,27 @@ module Ng
           end
         end
 
-        Ng::ActiveRelation.new(self, results)
+        ORM::ActiveRelation.new(self, results)
       end
+
+      # TODO: implement create functionality
+      #def create(hash)
+      #
+      #end
 
       def objects_array(obj)
         obj.inject([]){ |result, lang_hash| result << new(lang_hash) }
       end
 
-      def attr_available(*attrs)
-        attr_accessor *(attrs << :id)
-      end
-
       private
 
       def json_table
-        JSON.parse(File.read("#{name.downcase.pluralize}.json")).map!.with_index do |lang, index|
-          lang.inject({ id: index }) do |h, (key, value)|
-            h.merge(key.downcase.gsub(' ', '_').to_sym => value)
-          end
-        end
+        ORM::DBConnection.new(self).table
       end
     end
   end
 end
+
+#TODO:
+# 1) implement functionality for migration
+# 2) implement functionality for create, update, delete

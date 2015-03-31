@@ -1,6 +1,6 @@
-module Ng
+module ORM
   class ActiveRelation
-    include Ng::ServicePack
+    include Support::ServicePack
 
     attr_accessor :collection, :type
 

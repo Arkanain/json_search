@@ -1,4 +1,4 @@
-module Ng
+module Support
   module ServicePack
     def self.included(base)
       before_methods

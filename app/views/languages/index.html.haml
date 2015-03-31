@@ -14,11 +14,12 @@
       %th.size-3
         Designed by
 
-    - @languages.each do |language|
+    - @languages.each do |lang|
       %tr.size-10
         %td.size-2
-          = language.name
+          -##TODO: WHY I SHOULD USE ID THERE?
+          = link_to lang.name, language_path(lang.id)
         %td.size-4
-          = language.type
+          = lang.type
         %td.size-3
-          = language.designed_by
+          = lang.designed_by
