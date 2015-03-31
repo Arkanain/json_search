@@ -1,11 +1,23 @@
 = JSON searching
 
-Project implement basic ActiveRecord and ActiveRelation functionality for JSON files as DB.
+Project implement basic functionality for working with JSON files as DB(<tt>ActiveRecord</tt>, <tt>ActiveRelation</tt>, <tt>DBConnection</tt>).
 
-What you need to do it's just add custom model for JSON file to <tt>app/services</tt>, inherit it from <tt>Ng::ActiveRecord</tt> and add <tt>attr_available</tt> for all field which you have in JSON file:
+What you need to do:
+1. Add JSON file(<tt>Don't forget to change file name to model plural name. For example - 'languages.json'</tt>) to <tt>app/services/db</tt> folder with table rows which should have structure like:
 
-  class Language < Ng::ActiveRecord
-    attr_available :name, :type, :designed_by
+    [{
+      "first_name": "John",
+      "last_name": "Doe"
+    },
+    {
+      "first_name": "Mark",
+      "last_name": "Smith"
+    }]
+
+2. create new <tt>rb</tt> file in <tt>app/services/models</tt> (name of file should equal to singular model name), inherit class name from <tt>ORM::ActiveRecord</tt>:
+
+  class Language < ORM::ActiveRecord
+    
   end
 
 After that you will be able to use standart methods like - <tt>all</tt>, <tt>where</tt>, <tt>matches</tt> and they will work like default methods in ActiveRecord (other methods still in progress).
