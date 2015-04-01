@@ -29,5 +29,3 @@ You should keep in mind that method <tt>where</tt> support:
 Web interface include two possible type of searching:
 * Global searching - Will be search by all fields in JSON file.
 * Field searching - This search is more complex. It allow you to include negative searching and searching in specified fields. 
-  
-P.S.: Don't forget to add <tt>database.yml</tt> to project.
