@@ -20,7 +20,7 @@ What you need to do:
     
   end
 
-After that you will be able to use standart methods like - <tt>all</tt>, <tt>where</tt>, <tt>matches</tt> and they will work like default methods in ActiveRecord (other methods still in progress).
+After that you will be able to use standart methods like - <tt>find</tt>, <tt>all</tt>, <tt>where</tt>, <tt>matches</tt>, <tt>create</tt> and they will work like default methods in ActiveRecord (other methods still in progress).
 
 You should keep in mind that method <tt>where</tt> support:
 * Inclusive searching(Full Designed By value is - Thomas Eugene Kurtz, but it quite enough just type - Thomas Eugene and you will take same result).
