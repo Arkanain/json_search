@@ -1,3 +1,21 @@
+html, body, input {
+  font: 16px/1.5 Arial !important;
+}
+
+#filter {
+  .filter-radio {
+    display: inline-block;
+    width: 150px;
+  }
+
+  form {
+    input[type='submit'] {
+      margin-top: 23px;
+      padding: 5px 20px;
+    }
+  }
+}
+
 table.list {
   text-align: left;
   margin-top: 20px;
@@ -9,6 +27,10 @@ table.list {
   tr {
     margin-bottom: 10px;
   }
+}
+
+form .submit {
+  margin-top: 19px;
 }
 
 .size-1 { width: 10%; display: inline-block; }
@@ -23,6 +45,15 @@ table.list {
 .size-10 { width: 100%; display: inline-block; }
 .column { margin: 5px 10px 5px 0; }
 input[type="text"] { width: 90%; }
+input[type="submit"], input[type="button"] {
+  outline: none;
+  border: 0 none;
+  padding: 0 19px;
+}
+input[type="submit"]::-moz-focus-inner, input[type="button"]::-moz-focus-inner {
+  border: 0 none;
+  outline: none;
+}
 
 .left { float: left; }
 .right { float: right; }
@@ -31,8 +62,27 @@ input[type="text"] { width: 90%; }
   -moz-appearance: none;
   background: none repeat scroll 0 0 #00c1e0;
   border: medium none;
-  border-radius: 3px;
+  border-radius: 15px;
   color: #fff;
-  font-size: inherit;
   padding: 0 20px;
+  text-decoration: none;
+  vertical-align: middle;
+  display: inline-block;
+}
+
+.button-alert {
+  background-color: #ff5e5e;
+  color: white;
+}
+
+h1 {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.create-button {
+  border-radius: 20px;
+  font-size: 20px;
+  margin: 5px 0 0 10px;
+  padding: 0 10px;
 }

@@ -5,6 +5,8 @@ module ORM
     end
 
     class << self
+      attr_accessor :db_connection
+
       def all
         ORM::ActiveRelation.new(self, json_table)
       end
@@ -52,10 +54,15 @@ module ORM
         ORM::ActiveRelation.new(self, results)
       end
 
-      # TODO: implement create functionality
-      #def create(hash)
-      #
-      #end
+      def create(hash)
+        connection
+
+        default_hash = db_connection.fields.inject({}) { |h, attr| h.merge(attr => '') }
+        counter = db_connection.counter
+        table_hash = default_hash.merge({ id: counter + 1 }.merge(hash.symbolize_keys))
+
+        db_connection.update_table(self, table_hash, :create)
+      end
 
       def objects_array(obj)
         obj.inject([]){ |result, lang_hash| result << new(lang_hash) }
@@ -63,8 +70,13 @@ module ORM
 
       private
 
+      def connection
+        self.db_connection = ORM::DBConnection.new(self)
+      end
+
       def json_table
-        ORM::DBConnection.new(self).table
+        connection
+        db_connection.table
       end
     end
   end
@@ -73,3 +85,5 @@ end
 #TODO:
 # 1) implement functionality for migration
 # 2) implement functionality for create, update, delete
+# 3) implement relation between tables
+# 4) implement validation functionality

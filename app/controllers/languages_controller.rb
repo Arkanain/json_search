@@ -12,4 +12,13 @@ class LanguagesController < ApplicationController
   def show
     @language = Language.find(params[:id])
   end
+
+  def new
+  end
+
+  def create
+    Language.create(params[:language])
+
+    redirect_to languages_path
+  end
 end

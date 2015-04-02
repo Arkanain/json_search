@@ -1,15 +1,27 @@
 module ORM
   class DBConnection
-    attr_accessor :table, :fields
+    attr_accessor :table, :fields, :counter
 
     def initialize(caller_model)
       get_table(caller_model)
       get_fields(caller_model)
     end
 
-    def update_table(hash, type)
-      # hash is what we will create, update, delete in table
-      # type is what we will do with table
+    def update_table(caller_model, hash, type)
+      table_name = caller_model.name.downcase.pluralize
+      table_path = "app/services/db/#{table_name}.json"
+
+      result_table = case type
+                      when :create
+                        update_counter(caller_model, hash[:id])
+                        table << hash
+                      when :update
+
+                      when :delete
+
+                     end
+
+      File.write(table_path, JSON.generate(result_table))
     end
 
     private
@@ -45,16 +57,32 @@ module ORM
           h.merge(key => value.class.to_s.downcase)
         end
 
-        database.merge!(table_name => db_fields)
+        database.merge!(
+          table_name => {
+            'counter' => (table.length - 1),
+            'fields' => db_fields
+          }
+        )
 
         File.write(db_path, JSON.generate(database))
       end
 
-      fields = database[table_name].keys.map(&:to_sym)
+      self.fields = database[table_name]['fields'].keys.map(&:to_sym)
+      self.counter = database[table_name]['counter']
 
       caller_model.instance_eval %(
         attr_accessor #{fields.map{|e| ":#{e}"}.join(', ')}
       )
+    end
+
+    def update_counter(caller_model, counter)
+      table_name = caller_model.name.downcase.pluralize
+      db_path = "app/services/db/database.json"
+      database = JSON.parse(File.read(db_path))
+
+      database[table_name]['counter'] = counter
+
+      File.write(db_path, JSON.generate(database))
     end
 
     #TODO: Need to implement this methods letter for more complex hashes
