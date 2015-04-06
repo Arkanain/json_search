@@ -1,0 +1,22 @@
+= form_for @language do |f|
+  .size-10.left.column
+    .size-10
+      = f.label :name
+    .size-4
+      = f.text_field :name
+
+  .size-10.left.column
+    .size-10
+      = f.label :type
+    .size-4
+      = f.text_field :type
+
+  .size-10.left.column
+    .size-10
+      = f.label :designed_by
+    .size-4
+      = f.text_field :designed_by
+
+  .size-10.left.column.submit
+    = f.submit class: 'button'
+    = link_to 'Back', languages_path, class: 'button button-alert'

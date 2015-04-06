@@ -14,10 +14,29 @@ class LanguagesController < ApplicationController
   end
 
   def new
+    @language = Language.new
   end
 
   def create
     Language.create(params[:language])
+
+    redirect_to languages_path
+  end
+
+  def edit
+    @language = Language.find(params[:id])
+  end
+
+  def update
+    @language = Language.find(params[:id])
+    @language.update_attributes(params[:language])
+
+    redirect_to languages_path
+  end
+
+  def destroy
+    @language = Language.find(params[:id])
+    @language.destroy
 
     redirect_to languages_path
   end

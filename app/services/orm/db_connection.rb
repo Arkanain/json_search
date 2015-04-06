@@ -1,97 +1,64 @@
 module ORM
   class DBConnection
-    attr_accessor :table, :fields, :counter
+    attr_accessor :table
 
     def initialize(caller_model)
-      get_table(caller_model)
-      get_fields(caller_model)
+      @table_name = caller_model.name.downcase.pluralize.to_sym
+      @table_path = "app/services/db/tables/#{@table_name}.json"
+      @db_path = 'app/services/db/database.json'
     end
 
-    def update_table(caller_model, hash, type)
-      table_name = caller_model.name.downcase.pluralize
-      table_path = "app/services/db/#{table_name}.json"
-
+    def update_table(hash, type)
       result_table = case type
                       when :create
-                        update_counter(caller_model, hash[:id])
+                        update_counter(hash[:id])
                         table << hash
                       when :update
-
+                        table.map! { |e| e[:id] == hash[:id] ? e = e.merge!(hash) : e }
                       when :delete
-
+                        table.delete_if { |e| e[:id] == hash[:id] }
                      end
 
-      File.write(table_path, JSON.generate(result_table))
+      File.write(@table_path, JSON.generate(result_table))
+    end
+
+    def counter
+      read_and_parse_file(@db_path)[@table_name][:counter]
+    end
+
+    def table
+      read_and_parse_file(@table_path)
     end
 
     private
 
-    def get_table(caller_model)
-      table_name = caller_model.name.downcase.pluralize
-      table_path = "app/services/db/#{table_name}.json"
+    def read_and_parse_file(path)
+      json = JSON.parse(File.read(path))
+      recursive_symbolize_keys!(json)
+    end
 
-      raise StandardError, "#{table_name} table doesn't exist." unless File.exist?(table_path)
+    def update_counter(counter)
+      database = read_and_parse_file(@db_path)
+      database[@table_name][:counter] = counter
 
-      json = JSON.parse(File.read(table_path))
+      File.write(@db_path, JSON.generate(database))
+    end
 
-      if json.first.present? and json.first.keys != json.first.keys.map(&:downcase)
-        self.table = json.map!.with_index do |lang, index|
-          lang.inject({ id: index }) do |h, (key, value)|
-            h.merge(key.downcase.gsub(' ', '_').to_sym => value)
+    def recursive_symbolize_keys!(object)
+      case
+        when object.is_a?(Hash)
+          object.keys.each do |key|
+            key_symbol = key.to_sym
+            object[key_symbol] = object.delete(key)
+            recursive_symbolize_keys! object[key_symbol] if object[key_symbol].kind_of?(Hash)
           end
-        end
-
-        File.write(table_path, JSON.generate(table))
-      else
-        self.table = json.map(&:symbolize_keys)
-      end
-    end
-
-    def get_fields(caller_model)
-      table_name = caller_model.name.downcase.pluralize
-      db_path = "app/services/db/database.json"
-      database = JSON.parse(File.read(db_path))
-
-      if database[table_name].blank?
-        db_fields = table.first.inject({}) do |h, (key, value)|
-          h.merge(key => value.class.to_s.downcase)
-        end
-
-        database.merge!(
-          table_name => {
-            'counter' => (table.length - 1),
-            'fields' => db_fields
-          }
-        )
-
-        File.write(db_path, JSON.generate(database))
+        when object.is_a?(Array)
+          object.each do |item|
+            recursive_symbolize_keys!(item)
+          end
       end
 
-      self.fields = database[table_name]['fields'].keys.map(&:to_sym)
-      self.counter = database[table_name]['counter']
-
-      caller_model.instance_eval %(
-        attr_accessor #{fields.map{|e| ":#{e}"}.join(', ')}
-      )
+      object
     end
-
-    def update_counter(caller_model, counter)
-      table_name = caller_model.name.downcase.pluralize
-      db_path = "app/services/db/database.json"
-      database = JSON.parse(File.read(db_path))
-
-      database[table_name]['counter'] = counter
-
-      File.write(db_path, JSON.generate(database))
-    end
-
-    #TODO: Need to implement this methods letter for more complex hashes
-    #def recursive_symbolize_keys!(object)
-    #  object.keys.each do |key|
-    #    key_symbol = key.to_sym
-    #    object[key_symbol] = object.delete(key)
-    #    recursive_symbolize_keys! object[key_symbol] if object[key_symbol].kind_of?(Hash)
-    #  end
-    #end
   end
 end

@@ -19,8 +19,8 @@
     - @languages.each do |lang|
       %tr.size-10
         %td.size-2
-          -##TODO: WHY I SHOULD USE ID THERE?
-          = link_to lang.name, language_path(lang.id)
+          = link_to lang.name, language_path(lang)
+          = link_to image_tag('trash.png'), language_path(lang), method: :delete, class: 'button delete-button'
         %td.size-4
           = lang.type
         %td.size-3

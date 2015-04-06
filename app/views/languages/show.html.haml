@@ -1,5 +1,7 @@
-%h1
-  = @language.name
+.size-10
+  %h1
+    = @language.name
+  = link_to image_tag('pensil.png'), edit_language_path(@language), class: 'button create-button'
 
 .size-10
   .size-10

@@ -1,12 +1,25 @@
 module ORM
   class ActiveRecord
-    def initialize(hash)
-      hash.map { |key, value| send("#{key}=", value) }
+    def create
+      db_connection = ORM::DBConnection.new(self.class)
+
+      self.id = db_connection.counter + 1
+      db_connection.update_table(self.attributes, :create)
+    end
+
+    def update_attributes(attributes)
+      db_connection = ORM::DBConnection.new(self.class)
+
+      attributes.each { |key, value| send("#{key}=", value) }
+      db_connection.update_table(self.attributes, :update)
+    end
+
+    def destroy
+      db_connection = ORM::DBConnection.new(self.class)
+      db_connection.update_table(self.attributes, :delete)
     end
 
     class << self
-      attr_accessor :db_connection
-
       def all
         ORM::ActiveRelation.new(self, json_table)
       end
@@ -55,13 +68,7 @@ module ORM
       end
 
       def create(hash)
-        connection
-
-        default_hash = db_connection.fields.inject({}) { |h, attr| h.merge(attr => '') }
-        counter = db_connection.counter
-        table_hash = default_hash.merge({ id: counter + 1 }.merge(hash.symbolize_keys))
-
-        db_connection.update_table(self, table_hash, :create)
+        new(hash).create
       end
 
       def objects_array(obj)
@@ -70,13 +77,8 @@ module ORM
 
       private
 
-      def connection
-        self.db_connection = ORM::DBConnection.new(self)
-      end
-
       def json_table
-        connection
-        db_connection.table
+        ORM::DBConnection.new(self).table
       end
     end
   end
@@ -84,6 +86,5 @@ end
 
 #TODO:
 # 1) implement functionality for migration
-# 2) implement functionality for create, update, delete
-# 3) implement relation between tables
-# 4) implement validation functionality
+# 2) implement relation between tables
+# 3) implement validation functionality

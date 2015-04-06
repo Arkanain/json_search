@@ -1,7 +1,3 @@
-html, body, input {
-  font: 16px/1.5 Arial !important;
-}
-
 #filter {
   .filter-radio {
     display: inline-block;
@@ -31,58 +27,4 @@ table.list {
 
 form .submit {
   margin-top: 19px;
-}
-
-.size-1 { width: 10%; display: inline-block; }
-.size-2 { width: 20%; display: inline-block; }
-.size-3 { width: 30%; display: inline-block; }
-.size-4 { width: 40%; display: inline-block; }
-.size-5 { width: 50%; display: inline-block; }
-.size-6 { width: 60%; display: inline-block; }
-.size-7 { width: 70%; display: inline-block; }
-.size-8 { width: 80%; display: inline-block; }
-.size-9 { width: 90%; display: inline-block; }
-.size-10 { width: 100%; display: inline-block; }
-.column { margin: 5px 10px 5px 0; }
-input[type="text"] { width: 90%; }
-input[type="submit"], input[type="button"] {
-  outline: none;
-  border: 0 none;
-  padding: 0 19px;
-}
-input[type="submit"]::-moz-focus-inner, input[type="button"]::-moz-focus-inner {
-  border: 0 none;
-  outline: none;
-}
-
-.left { float: left; }
-.right { float: right; }
-
-.button {
-  -moz-appearance: none;
-  background: none repeat scroll 0 0 #00c1e0;
-  border: medium none;
-  border-radius: 15px;
-  color: #fff;
-  padding: 0 20px;
-  text-decoration: none;
-  vertical-align: middle;
-  display: inline-block;
-}
-
-.button-alert {
-  background-color: #ff5e5e;
-  color: white;
-}
-
-h1 {
-  display: inline-block;
-  vertical-align: middle;
-}
-
-.create-button {
-  border-radius: 20px;
-  font-size: 20px;
-  margin: 5px 0 0 10px;
-  padding: 0 10px;
 }

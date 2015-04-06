@@ -12,6 +12,6 @@
 //
 //= require jquery
 //= require jquery_ujs
-//= require languages.js.coffee
+//= require languages.js
 
 //= require_tree .
