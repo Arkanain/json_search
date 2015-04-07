@@ -19,6 +19,6 @@
 .idea/*
 
 # Ignore model, tables and database files
-/app/services/tables/*.json
-/app/services/*.json
+/app/services/db/tables/*.json
+/app/services/db/*.json
 /app/models/*.rb
