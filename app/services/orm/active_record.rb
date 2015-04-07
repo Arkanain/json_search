@@ -90,5 +90,3 @@ end
 # 2) implement relation between tables
 # 3) implement validation functionality
 # 4) scope functionality
-# 5) create save method which will use @new_record functionality
-# 6) rewrite create method via save
