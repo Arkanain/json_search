@@ -21,4 +21,4 @@
 # Ignore model, tables and database files
 /app/services/db/tables/*.json
 /app/services/db/*.json
-/app/models/*.rb
+/app/services/models/*.rb
