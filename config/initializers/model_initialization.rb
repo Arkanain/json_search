@@ -116,8 +116,10 @@ database.each do |table_name, inner|
             attributes[key]
           end
 
-          define_method("#{key}=") do |value|
-            attributes[key] = value
+          unless key == :id
+            define_method("#{key}=") do |value|
+              attributes[key] = value
+            end
           end
         end
       end

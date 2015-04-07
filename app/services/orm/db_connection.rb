@@ -9,17 +9,21 @@ module ORM
     end
 
     def update_table(hash, type)
-      result_table = case type
-                      when :create
-                        update_counter(hash[:id])
-                        table << hash
-                      when :update
-                        table.map! { |e| e[:id] == hash[:id] ? e = e.merge!(hash) : e }
-                      when :delete
-                        table.delete_if { |e| e[:id] == hash[:id] }
-                     end
+      if hash[:id].present?
+        result_table = case type
+                        when :create
+                          update_counter(hash[:id])
+                          table << hash
+                        when :update
+                          table.map! { |e| e[:id] == hash[:id] ? e = e.merge!(hash) : e }
+                        when :delete
+                          table.delete_if { |e| e[:id] == hash[:id] }
+                       end
 
-      File.write(@table_path, JSON.generate(result_table))
+        File.write(@table_path, JSON.generate(result_table))
+      else
+        raise StandardError, "Something went wrong."
+      end
     end
 
     def counter

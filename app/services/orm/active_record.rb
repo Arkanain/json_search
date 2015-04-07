@@ -1,17 +1,18 @@
 module ORM
   class ActiveRecord
-    def create
+    def save
       db_connection = ORM::DBConnection.new(self.class)
 
-      self.id = db_connection.counter + 1
-      db_connection.update_table(self.attributes, :create)
+      self.attributes.merge!({id: db_connection.counter + 1}) if new_record
+
+      type = new_record ? :create : :update
+
+      db_connection.update_table(self.attributes, type)
     end
 
     def update_attributes(attributes)
-      db_connection = ORM::DBConnection.new(self.class)
-
       attributes.each { |key, value| send("#{key}=", value) }
-      db_connection.update_table(self.attributes, :update)
+      save
     end
 
     def destroy
@@ -68,7 +69,7 @@ module ORM
       end
 
       def create(hash)
-        new(hash).create
+        new(hash).save
       end
 
       def objects_array(obj)
@@ -88,3 +89,6 @@ end
 # 1) implement functionality for migration
 # 2) implement relation between tables
 # 3) implement validation functionality
+# 4) scope functionality
+# 5) create save method which will use @new_record functionality
+# 6) rewrite create method via save
