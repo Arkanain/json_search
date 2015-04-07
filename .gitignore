@@ -14,4 +14,11 @@
 # Ignore all logfiles and tempfiles.
 /log/*.log
 /tmp
+
+# Ignore IDE files
 .idea/*
+
+# Ignore model, tables and database files
+/app/services/tables/*.json
+/app/services/*.json
+/app/models/*.rb
