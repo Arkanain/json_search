@@ -3,7 +3,8 @@
 Project implement basic functionality for working with JSON files as DB(<tt>ActiveRecord</tt>, <tt>ActiveRelation</tt>, <tt>DBConnection</tt>, <tt>ActiveModel</tt>).
 
 What you need to do:
-1. Add JSON file(<tt>Don't forget to change file name to model plural name. For example - 'languages.json'</tt>) to <tt>app/services/db/tables</tt> folder with table rows which should have structure like:
+1. Add JSON file(<tt>Don't forget to change file name to model plural name. For example - 'languages.json'</tt>) to <tt>app/services/db/tables</tt> folder. I made example model - language.json which you can find in project root directory. I use it for testing so you can try already existing controller functionality after you will make what I wrote above.
+Table rows in file should have structure like:
 
     [{
       "first_name": "John",
@@ -20,12 +21,13 @@ After that you will be able to use standart model methods:
     1. find 
     2. all 
     3. where
-    4. matches
+    4. matches( Example: Language.matches(params[:query_string], [:name, :type, :designed_by])
     5. create
     6. new
     7. update_attributes
     8. destroy
     9. save
+    10. scope( Example row for model: scope :by_name, -> (name) { where(name: name) } )
     
 and they will work like default methods in ActiveRecord (other methods still in progress).
 
