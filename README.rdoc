@@ -2,8 +2,13 @@
 
 Project implement basic functionality for working with JSON files as DB(<tt>ActiveRecord</tt>, <tt>ActiveRelation</tt>, <tt>DBConnection</tt>, <tt>ActiveModel</tt>).
 
-What you need to do:
-1. Add JSON file(<tt>Don't forget to change file name to model plural name. For example - 'languages.json'</tt>) to <tt>app/services/db/tables</tt> folder. I made example model - language.json which you can find in project root directory. I use it for testing so you can try already existing controller functionality after you will make what I wrote above.
+What you need to do if you don't have your own table file:
+I made examples for model and table - language.rb and language.json which you can find in <tt>app/services/examples</tt> folder. I use it for testing. So you can try already existing controller functionality after you will: 
+* move languages.json file to <tt>app/services/db/tables</tt> folder.
+* move language.rb file to <tt>app/services/models</tt> folder.
+
+What you need to do if you have your own table file:
+Add JSON file(<tt>Don't forget to change file name to model plural name. For example - 'languages.json'</tt>) to <tt>app/services/db/tables</tt> folder. 
 Table rows in file should have structure like:
 
     [{
