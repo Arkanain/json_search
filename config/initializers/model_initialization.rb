@@ -116,6 +116,7 @@ database.each do |table_name, inner|
             attributes[key]
           end
 
+          # I don't create attr_writer for :id field because I don't want to leave user any possibility to change this field
           unless key == :id
             define_method("#{key}=") do |value|
               attributes[key] = value
@@ -124,8 +125,19 @@ database.each do |table_name, inner|
         end
       end
 
-      # This attribute tell us is record new of it's already present in a system
+      # This attribute tell us is record new of it's already present in a system.
       @new_record = attributes[:id].blank?
+    end
+
+    # This functionality needs to include scoping methods to our class.
+    # We thrown an error when the class already contains a method with the same name as any of scopes in class.
+    # Also you can see in list of dangerous methods method :name. Its because we need and we use this method for class
+    # in different parts of code and its not a good idea to override it.
+    metched_methods = self.scopes.instance_methods & (self.methods - Object.methods + [:name])
+    if metched_methods.empty?
+      extend scopes
+    else
+      raise StandardError, "Name already taken. Please rename your scopes - #{metched_methods.join(', ')}."
     end
   end
 end

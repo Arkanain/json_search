@@ -21,6 +21,9 @@ module ORM
     end
 
     class << self
+      # This attr accessor need for scopes which is declarated in a class
+      attr_accessor :scopes
+
       def all
         ORM::ActiveRelation.new(self, json_table)
       end
@@ -72,6 +75,15 @@ module ORM
         new(hash).save
       end
 
+      def scope(name, lambda)
+        # Initialize empty module as a contianer for scope functions.
+        self.scopes ||= Module.new
+
+        self.scopes.module_eval do
+          define_method(name.to_sym, &lambda)
+        end
+      end
+
       def objects_array(obj)
         obj.inject([]){ |result, lang_hash| result << new(lang_hash) }
       end
@@ -89,4 +101,3 @@ end
 # 1) implement functionality for migration
 # 2) implement relation between tables
 # 3) implement validation functionality
-# 4) scope functionality

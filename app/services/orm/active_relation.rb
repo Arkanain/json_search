@@ -7,6 +7,8 @@ module ORM
     def initialize(type, obj)
       self.type = type
       self.collection = obj
+
+      self.class.include self.type.scopes
     end
 
     def where(hash)
