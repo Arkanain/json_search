@@ -89,6 +89,10 @@ database.each do |table_name, inner|
 
   # There I create class constructor and add getter and setter methods for all fields in a table
   model.class_eval do
+    class ActiveRelation
+      include ORM::ActiveRel
+    end
+
     # This part need firstly for passing column types from outer code,
     # secondary - each class should have info about fields and their types
     @column_types = column_types
@@ -133,11 +137,13 @@ database.each do |table_name, inner|
     # We thrown an error when the class already contains a method with the same name as any of scopes in class.
     # Also you can see in list of dangerous methods method :name. Its because we need and we use this method for class
     # in different parts of code and its not a good idea to override it.
-    metched_methods = self.scopes.instance_methods & (self.methods - Object.methods + [:name])
-    if metched_methods.empty?
-      extend scopes
-    else
-      raise StandardError, "Name already taken. Please rename your scopes - #{metched_methods.join(', ')}."
+    if self.scopes.present?
+      metched_methods = self.scopes.instance_methods & (self.methods - Object.methods + [:name])
+      if metched_methods.empty?
+        extend scopes
+      else
+        raise StandardError, "Name already taken. Please rename your scopes - #{metched_methods.join(', ')}."
+      end
     end
   end
 end

@@ -25,7 +25,7 @@ module ORM
       attr_accessor :scopes
 
       def all
-        ORM::ActiveRelation.new(self, json_table)
+        ActiveRelation.new(self, json_table)
       end
 
       def find(id)
@@ -48,7 +48,7 @@ module ORM
           end
         end
 
-        ORM::ActiveRelation.new(self, obj)
+        ActiveRelation.new(self, obj)
       end
 
       def matches(string, fields, collection = nil)
@@ -68,7 +68,7 @@ module ORM
           end
         end
 
-        ORM::ActiveRelation.new(self, results)
+        ActiveRelation.new(self, results)
       end
 
       def create(hash)

@@ -1,5 +1,5 @@
 module ORM
-  class ActiveRelation
+  module ActiveRel
     include Support::ServicePack
 
     attr_accessor :collection, :type
