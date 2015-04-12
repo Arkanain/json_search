@@ -57,9 +57,7 @@ module ORM
             recursive_symbolize_keys! object[key_symbol] if object[key_symbol].kind_of?(Hash)
           end
         when object.is_a?(Array)
-          object.each do |item|
-            recursive_symbolize_keys!(item)
-          end
+          object.each { |item| recursive_symbolize_keys!(item) }
       end
 
       object
