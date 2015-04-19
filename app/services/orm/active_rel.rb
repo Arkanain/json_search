@@ -8,7 +8,7 @@ module ORM
       self.type = type
       self.collection = obj
 
-      self.class.include self.type.scopes
+      self.class.include self.type.scopes if self.type.scopes.present?
     end
 
     def where(hash)

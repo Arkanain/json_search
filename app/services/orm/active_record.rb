@@ -25,11 +25,13 @@ module ORM
       attr_accessor :scopes
 
       def all
-        ActiveRelation.new(self, json_table)
+        self::ActiveRelation.new(self, json_table)
       end
 
       def find(id)
         obj = json_table.find { |e| e[:id] == id.to_i }
+
+        raise ORM::ActiveRecordError, "Couldn't find #{self} with id #{id}" if obj.blank?
 
         new(obj)
       end
@@ -48,7 +50,7 @@ module ORM
           end
         end
 
-        ActiveRelation.new(self, obj)
+        self::ActiveRelation.new(self, obj)
       end
 
       def matches(string, fields, collection = nil)
@@ -68,7 +70,7 @@ module ORM
           end
         end
 
-        ActiveRelation.new(self, results)
+        self::ActiveRelation.new(self, results)
       end
 
       def create(hash)
