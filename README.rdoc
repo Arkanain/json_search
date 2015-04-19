@@ -1,11 +1,19 @@
 = JSON searching
 
-Project implement basic functionality(<tt>ActiveRecord</tt>, <tt>ActiveRelation</tt>, <tt>DBConnection</tt>, <tt>ActiveModel</tt>) for working with JSON files as DB.
+Project implement basic functionality for working with JSON files as DB:
+    1. ActiveRecord
+    2. ActiveRelation
+    3. DBConnection
+    4. ActiveModel(to set right naming for HTML helpers)
+    5. Migration
+    6. Rails Generators(for models and migrations)
 
 What you need to do if you don't have your own table file:
 I made examples for model and table - language.rb and language.json which you can find in <tt>examples</tt> folder in project root directory. I use it for testing. So you can try already existing controller functionality after you will: 
 * move languages.json file to <tt>app/services/db/tables</tt> folder.
 * move language.rb file to <tt>app/services/models</tt> folder.
+
+Also you can create your own models and migrations with standard generators - <tt>rails g model User</tt>. This generator will create model and migration for it with create_table in up method and drop_table in down method. After you will run <tt>rake db:migrate</tt> you will be able to work with your table.
 
 What you need to do if you have your own table file:
 Add JSON file(<tt>Don't forget to change file name to model plural name. For example - 'languages.json'</tt>) to <tt>app/services/db/tables</tt> folder. 
@@ -23,7 +31,7 @@ Table rows in file should have structure like:
 And that's it, everything else will be created for you in runtime(database file, regular table structure and model file). 
 
 After that you will be able to use standart model methods:
-    1. find 
+    1. find
     2. all 
     3. where
     4. matches( Example: Language.matches(params[:query_string], [:name, :type, :designed_by])
@@ -43,3 +51,17 @@ You should keep in mind that method <tt>where</tt> support:
 Web interface include two possible type of searching:
 * Global searching - Will be search by all fields in JSON file.
 * Field searching - This search is more complex. It allow you to include negative searching and searching in specified fields. 
+    
+Also I implement few rails generators:
+    1. rails g model <model_name>
+    2. rails g migration <migration_name>
+    
+All methods for migrations still in progress but you can use some of them now:
+    1. create_table <table_name>
+    2. drop_table <table_name>
+
+I added few rake tasks for DB so you can use them too:
+    1. rake db:create - create db for project.
+    2. rake db:drop - remove project db.
+    3. rake db:migrate - run all migrations in <tt>db/migrate</tt> folder.
+    4. rake db:rollback - rollback all runned migrations.
