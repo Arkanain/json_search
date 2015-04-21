@@ -1,4 +1,5 @@
 require 'orm/project_error'
+require 'orm/db_connection'
 
 db_path = "app/services/db/database.json"
 
@@ -13,9 +14,10 @@ Dir[Rails.root.join("app/services/db/tables/*.json")].each do |table_path|
   #Override default table and add id for each field in it
   if json.first.present? and json.first.keys != json.first.keys.map(&:downcase)
     table = json.map!.with_index do |rows, index|
-      rows.inject({ id: index }) do |h, (key, value)|
+      rows = rows.inject({ id: index }) do |h, (key, value)|
         h.merge(key.downcase.gsub(' ', '_').to_sym => value)
       end
+      rows.merge!({'created_at' => "#{Time.now.utc}", 'updated_at' => "#{Time.now.utc}"})
     end
 
     File.write(table_path, JSON.generate(table))
@@ -26,8 +28,10 @@ Dir[Rails.root.join("app/services/db/tables/*.json")].each do |table_path|
   table_name = File.basename(table_path, '.json')
   if database[table_name].blank?
     db_fields = table.first.inject({}) do |h, (key, value)|
-      h.merge(key => value.class.to_s.downcase)
+      h.merge(key => ORM::DBConnection.get_field_class(value))
     end
+
+    db_fields.merge!({'created_at' => 'datetime', 'updated_at' => 'datetime'})
 
     database.merge!(
       table_name => {
@@ -53,6 +57,6 @@ File.write(db_path, JSON.generate(database))
 #Init DB and set instance methods for each model in models directory
 Dir[Rails.root.join("app/services/models/*.rb")].each { |f| require f }
 
-database.each do |table_source|
+ORM::DBConnection.db_structure.each do |table_source|
   ORM::ModelInit.init(table_source)
 end

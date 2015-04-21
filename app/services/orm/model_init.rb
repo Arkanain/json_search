@@ -2,13 +2,15 @@ module ORM
   class ModelInit
     def self.init(table_source)
       table_name, table_inner = table_source
-      column_types = table_inner['fields'].symbolize_keys
-      model = table_name.singularize.titleize.constantize
+      column_types = table_inner[:fields].symbolize_keys
+      model = table_name.to_s.singularize.titleize.constantize
 
       # Include ActiveRelation uniq for each model
-      model.const_set(:ActiveRelation, Class.new {
-        include ORM::ActiveRel
-      })
+      unless model.constants.include?(:ActiveRelation)
+        model.const_set(:ActiveRelation, Class.new {
+          include ORM::ActiveRel
+        })
+      end
 
       # There I create class constructor and add getter and setter methods for all fields in a table
       model.class_eval do

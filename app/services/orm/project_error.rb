@@ -5,9 +5,12 @@ module ORM
   class DBError < StandardError
   end
 
-  class TableError < StandardError
+  class TableError < DBError
   end
 
-  class ModelError < StandardError
+  class ModelError < ActiveRecordError
+  end
+
+  class FieldTypeError < DBError
   end
 end

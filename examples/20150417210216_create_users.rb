@@ -1,8 +1,10 @@
 class CreateUsers < ORM::Migration
   def up
     create_table :users do |t|
-      t.column  :first_name, :string
-      t.column  :last_name, :string
+      t.string  :first_name
+      t.string  :last_name
+
+      t.timestamps
     end
   end
 

@@ -21,7 +21,7 @@ module ORM
     end
 
     class << self
-      # This attr accessor need for scopes which is declarated in a class
+      # This attr accessor need for scopes which is declared in a class
       attr_accessor :scopes
 
       def all
@@ -103,3 +103,11 @@ end
 # 1) implement functionality for migration
 # 2) implement relation between tables
 # 3) implement validation functionality
+
+#TODO: I will need this for validation
+# :string && :text = String = "string"
+# :integer = Integer = "integer"
+# :float = Float = "float"
+# :decimal = BigDecimal = "decimal"
+# :datetime && :timestamp && :time && :date = DateTime = "datetime"
+# :boolean = FalseClass || TrueClass = "boolean"
