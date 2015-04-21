@@ -56,11 +56,22 @@ Also I implement few rails generators:
     1. rails g model <model_name>
     2. rails g migration <migration_name>
     
-All methods for migrations still in progress but you can use some of them now:
+Methods for migrations:
     1. create_table <table_name>
     2. drop_table <table_name>
+    3. add_column <table_name>, <column_name>, <column_type>
+    4. remove_column <table_name>, <column_name>
+    5. rename_column <table_name>, <old_column_name>, <new_column_name>
+    6. change_column <table_name>, <column_name>, <column_type>
+    
+Also I added methods for default SQL types for create_table but you still can use default method column. Usage example:
+    create_table :users do |t|
+        t.string :first_name
+    end
+    
+Possible field types is - <tt>string</tt>, <tt>text</tt>, <tt>integer</tt>, <tt>float</tt>, <tt>decimal</tt>, <tt>datetime</tt>, <tt>timestamp</tt>, <tt>time</tt>, <tt>date</tt>, <tt>boolean</tt>
 
-I added few rake tasks for DB so you can use them too:
+I added few rake tasks for DB so you can use them too(keep in mind that I don't implement yet functionality to migrate latest migrations and functionality to rollback last runned migrations):
     1. rake db:create - create db for project.
     2. rake db:drop - remove project db.
     3. rake db:migrate - run all migrations in <tt>db/migrate</tt> folder.
