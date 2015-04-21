@@ -2,6 +2,7 @@ class Create<%= model_name.camelize.pluralize %> < ORM::Migration
   def up
     create_table :<%= model_name.underscore.pluralize %> do |t|
 
+      t.timestamps
     end
   end
 
