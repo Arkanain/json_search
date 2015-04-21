@@ -28,7 +28,7 @@ Table rows in file should have structure like:
       "last_name": "Smith"
     }]
 
-And that's it, everything else will be created for you in runtime(database file, regular table structure and model file). 
+And that's it, everything else will be created for you in runtime(database structure, correct table structure and model file). 
 
 After that you will be able to use standart model methods:
     1. find
@@ -74,5 +74,5 @@ Possible field types is - <tt>string</tt>, <tt>text</tt>, <tt>integer</tt>, <tt>
 I added few rake tasks for DB so you can use them too(keep in mind that I don't implement yet functionality to migrate latest migrations and functionality to rollback last runned migrations):
     1. rake db:create - create db for project.
     2. rake db:drop - remove project db.
-    3. rake db:migrate - run all migrations in <tt>db/migrate</tt> folder.
+    3. rake db:migrate - run all migrations in db/migrate folder.
     4. rake db:rollback - rollback all runned migrations.
