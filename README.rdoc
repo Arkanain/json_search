@@ -13,8 +13,6 @@ I made examples for model and table - language.rb and language.json which you ca
 * move languages.json file to <tt>app/services/db/tables</tt> folder.
 * move language.rb file to <tt>app/services/models</tt> folder.
 
-Also you can create your own models and migrations with standard generators - <tt>rails g model User</tt>. This generator will create model and migration for it with create_table in up method and drop_table in down method. After you will run <tt>rake db:migrate</tt> you will be able to work with your table.
-
 What you need to do if you have your own table file:
 Add JSON file(<tt>Don't forget to change file name to model plural name. For example - 'languages.json'</tt>) to <tt>app/services/db/tables</tt> folder. 
 Table rows in file should have structure like:
@@ -27,6 +25,8 @@ Table rows in file should have structure like:
       "first_name": "Mark",
       "last_name": "Smith"
     }]
+
+Also you can create your own models and migrations with standard generators - <tt>rails g model User</tt>. This generator will create model and migration for it with create_table in up method and drop_table in down method. After you will run <tt>rake db:migrate</tt> you will be able to work with your table.
 
 And that's it, everything else will be created for you in runtime(database structure, correct table structure and model file). 
 
@@ -71,7 +71,7 @@ Also I added methods for default SQL types for create_table but you still can us
     
 Possible field types is - <tt>string</tt>, <tt>text</tt>, <tt>integer</tt>, <tt>float</tt>, <tt>decimal</tt>, <tt>datetime</tt>, <tt>timestamp</tt>, <tt>time</tt>, <tt>date</tt>, <tt>boolean</tt>
 
-I added few rake tasks for DB so you can use them too(keep in mind that I don't implement yet functionality to migrate latest migrations and functionality to rollback last runned migrations):
+I added few rake tasks for DB so you can use them too:
     1. rake db:create - create db for project.
     2. rake db:drop - remove project db.
     3. rake db:migrate - run all migrations in db/migrate folder.
