@@ -8,11 +8,15 @@ namespace :db do
   end
 
   task :drop do
+    db_path = 'app/services/db/database.json'
+
+    raise ORM::DBError, "Database doesn't exist." unless File.exist?(db_path)
+
     Dir['app/services/db/tables/*.json'].each do |table_path|
       File.delete(table_path)
     end
 
-    File.delete('app/services/db/database.json')
+    File.delete(db_path)
   end
 
   task :migrate => :environment do
@@ -55,24 +59,26 @@ namespace :db do
     schema_path = 'app/services/db/schema.json'
     schema = JSON.parse(File.read(schema_path))
 
-    # Get list of migrations and reverse it to facilitate processing
-    all_migrations = Dir[Rails.root.join('app/services/db/migrate/*.rb')].reverse!
-    latest_index = all_migrations.index { |m| m.include?(schema.last.first.to_s) }
-    latest_migrations = all_migrations[latest_index, schema.last.last]
+    if schema.present?
+      # Get list of migrations and reverse it to facilitate processing
+      all_migrations = Dir[Rails.root.join('app/services/db/migrate/*.rb')].reverse!
+      latest_index = all_migrations.index { |m| m.include?(schema.last.first.to_s) }
+      latest_migrations = all_migrations[latest_index, schema.last.last]
 
-    # Run all migrations for rollback
-    # Pop last element from array of arrays
-    latest_migrations.each do |migration|
-      file_name = File.basename(migration, '.rb').split('_')
-      migration_number = file_name.first
-      migration_class = (file_name - [migration_number]).join('_').camelize
+      # Run all migrations for rollback
+      # Pop last element from array of arrays
+      latest_migrations.each do |migration|
+        file_name = File.basename(migration, '.rb').split('_')
+        migration_number = file_name.first
+        migration_class = (file_name - [migration_number]).join('_').camelize
 
-      require migration
+        require migration
 
-      migration_class.constantize.new.down
+        migration_class.constantize.new.down
+      end
+
+      schema.pop
+      File.write(schema_path, JSON.generate(schema))
     end
-
-    schema.pop
-    File.write(schema_path, JSON.generate(schema))
   end
 end

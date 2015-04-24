@@ -13,4 +13,7 @@ module ORM
 
   class FieldTypeError < DBError
   end
+
+  class SchemaError < StandardError
+  end
 end
