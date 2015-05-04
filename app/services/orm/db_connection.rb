@@ -59,29 +59,47 @@ module ORM
     end
 
     def initialize(caller_model)
-      @table_name = caller_model.name.downcase.pluralize.to_sym
+      @table_name = caller_model.name.underscore.pluralize.to_sym
       @table_path = "app/services/db/tables/#{@table_name}.json"
 
       raise ORM::DBError, "Table #{@table_name} doesn't exist." unless File.exist?(@table_path)
     end
 
-    # Functionality to work with adding row to DB, updating row in DB and deleting column from DB.
-    def update_table(hash, type)
-      if hash[:id].present?
-        result_table = case type
-                        when :create
-                          update_counter(hash[:id])
-                          table << hash
-                        when :update
-                          table.map! { |e| e[:id] == hash[:id] ? e = e.merge!(hash) : e }
-                        when :delete
-                          table.delete_if { |e| e[:id] == hash[:id] }
-                       end
+    # Functionality to work with adding row to DB
+    def create_row(hash)
+      raise ORM::TableError, "Something went wrong." unless hash[:id].present?
 
-        File.write(@table_path, JSON.generate(result_table))
-      else
-        raise ORM::TableError, "Something went wrong."
-      end
+      update_counter(hash[:id])
+      result_table = table << hash
+      File.write(@table_path, JSON.generate(result_table))
+    end
+
+    # Functionality to work with updating row in DB
+    def update_row(hash)
+      raise ORM::TableError, "Something went wrong." unless hash[:id].present?
+
+      result_table = table.map! { |e| e[:id] == hash[:id] ? e = e.merge!(hash) : e }
+      File.write(@table_path, JSON.generate(result_table))
+    end
+
+    # Functionality to work with deleting row from DB
+    def delete_row(hash)
+      raise ORM::TableError, "Something went wrong." unless hash[:id].present?
+
+      result_table = table.delete_if { |e| e[:id] == hash[:id] }
+      File.write(@table_path, JSON.generate(result_table))
+    end
+
+    # Add field with nil value for each row in DB table
+    def add_field(field_name)
+      result_table = table.map { |row| row.merge!(field_name => nil) }
+      File.write(@table_path, JSON.generate(result_table))
+    end
+
+    # Remove field from each row in DB table
+    def remove_field(field_name)
+      result_table = table.each { |row| row.delete(field_name) }
+      File.write(@table_path, JSON.generate(result_table))
     end
 
     # Getter method for getting counter value
@@ -114,12 +132,20 @@ module ORM
     end
 
     def add_table_column(name, type)
+      # Add column to each row in table
+      add_field(name)
+
+      # Add column and return DB structure for table
       db_column_func do |new_struct|
         new_struct[@table_name][:fields].merge!(name => type)
       end
     end
 
     def remove_table_column(name)
+      # Remove column from each row in table
+      remove_field(name)
+
+      # Remove column and return DB structure for table
       db_column_func do |new_struct|
         new_struct[@table_name][:fields].delete(name)
       end

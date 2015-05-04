@@ -3,7 +3,7 @@ module ORM
     def self.init(table_source)
       table_name, table_inner = table_source
       column_types = table_inner[:fields].symbolize_keys
-      model = table_name.to_s.singularize.titleize.constantize
+      model = table_name.to_s.singularize.camelize.constantize
 
       # Include ActiveRelation uniq for each model
       unless model.constants.include?(:ActiveRelation)
@@ -59,11 +59,11 @@ module ORM
         # Also you can see in list of dangerous methods method :name. Its because we need and we use this method for class
         # in different parts of code and its not a good idea to override it.
         if self.scopes.present?
-          metched_methods = self.scopes.instance_methods & (self.methods - Object.methods + [:name])
-          if metched_methods.empty?
+          matched_methods = self.scopes.instance_methods & (self.methods - Object.methods + [:name])
+          if matched_methods.empty?
             extend scopes
           else
-            raise ORM::ModelError, "Name already taken. Please rename your scopes - #{metched_methods.join(', ')}."
+            raise ORM::ModelError, "Name already taken. Please rename your scopes - #{matched_methods.join(', ')}."
           end
         end
       end
@@ -93,6 +93,20 @@ module ORM
         # if not new record then form_for will setup method: :put(:patch) and id prefix: :edit
         define_method(:persisted?) do
           !new_record
+        end
+
+        # This functionality needs to include relations methods to our instance.
+        # We thrown an error when the instance already contains a method with the same name as any of relations in instance.
+        # Also you can see in list of dangerous methods method :name. Its because we need and we use this method for class
+        # in different parts of code and its not a good idea to override it.
+        if self.relations.present?
+          matched_methods = self.relations.instance_methods & (self.methods - Object.methods + [:name])
+
+          if matched_methods.empty?
+            include relations
+          else
+            raise ORM::ModelError, "Name already taken. Please rename your relation name - #{matched_methods.join(', ')}."
+          end
         end
       end
     end
