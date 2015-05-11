@@ -19,6 +19,11 @@ module ORM
       type.matches(string, fields, collection)
     end
 
+    def order(field_name)
+      collection.sort_by! { |row| row[field_name] }
+      self
+    end
+
     private
 
     def to_a

@@ -1,8 +1,8 @@
 module ORM
   module Associations
-    class HasMany < CollectionAssociation
+    class HasOne < SingularAssociation
       class << self
-        def has_many(current_object, relation_name, options={})
+        def has_one(current_object, relation_name, options={})
           @relation_name = relation_name.to_s
           @options = options
           @current_object = current_object
@@ -26,37 +26,32 @@ module ORM
                 #{source_type}.where(id: #{@options[:through]}.order(:#{order_key}).map(&:#{source_key}))
               end
 
-              define_method("#{@relation_name}=") do |values|
-                values = [values] unless values.is_a?(Array)
-
-                values.each do |value|
-                  unless value.is_a?(#{source_type})
-                    raise ORM::ModelError, "One of object which you try to assign is not a type of #{source_type}."
-                  end
+              define_method("#{@relation_name}=") do |value|
+                unless value.is_a?(#{source_type})
+                  raise ORM::ModelError, "One of object which you try to assign is not a type of #{source_type}."
                 end
 
-                #{@options[:through]} = #{related_table}.where(#{foreign_key}: self.#{primary_key}).map(&:#{source_key})
+                #{@options[:through]} = #{related_table}.where(#{foreign_key}: self.#{primary_key}).first
 
-                new_rows = values.map(&:id) - #{@options[:through]}
-                new_rows.each do |row_id|
-                  #{related_table}.create(#{foreign_key}: self.#{primary_key}, #{source_key}: row_id)
+                if #{@options[:through]}.present?
+                  #{@options[:through]}.#{source_key} = value.id
+                else
+                  #{related_table}.create(#{foreign_key}: self.#{primary_key}, #{source_key}: value.id)
                 end
               end
             CODE
           else
             @current_object.relations.module_eval <<-CODE
               define_method("#{@relation_name}") do
-                rows = #{class_name}.where(#{foreign_key}: self.#{primary_key}).order(:#{order_key})
+                #{class_name}.where(#{foreign_key}: self.#{primary_key}).order(:#{order_key}).first
               end
 
-              define_method("#{@relation_name}=") do |values|
-                values.each do |row|
-                  unless row.is_a?(#{class_name})
-                    raise ORM::ModelError, "One of objects which you try to assign is not a type of #{class_name}."
-                  end
-
-                  row.update_attribute(:#{foreign_key}, self.#{primary_key})
+              define_method("#{@relation_name}=") do |value|
+                unless value.is_a?(#{class_name})
+                  raise ORM::ModelError, "Objects which you try to assign is not a type of #{class_name}."
                 end
+
+                value.update_attribute(:#{foreign_key}, self.#{primary_key})
               end
             CODE
           end
@@ -66,20 +61,8 @@ module ORM
         #
         #end
 
-        #def dependent
-        #
-        #end
-
         def order_key
           @options[:order].present? ? @options[:order].to_sym : :id
-        end
-
-        def foreign_key
-          "#{@current_object.name.underscore}_id".to_sym
-        end
-
-        def primary_key
-          @options[:primary_key].present? ? @options[:primary_key].to_sym : :id
         end
 
         def related_table

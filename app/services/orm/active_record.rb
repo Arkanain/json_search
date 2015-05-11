@@ -49,6 +49,8 @@ module ORM
       end
 
       def find(id)
+        raise ORM::ActiveRecordError, "Couldn't find #{self} without id." if id.blank?
+
         obj = json_table.find { |e| e[:id] == id.to_i }
 
         raise ORM::ActiveRecordError, "Couldn't find #{self} with id #{id}" if obj.blank?
@@ -109,36 +111,19 @@ module ORM
         end
       end
 
-      def has_one(relation_name)
-        raise ORM::ModelError, 'has_one relation should have model singular name' if relation_name.to_s == relation_name.to_s.pluralize
-
+      def has_many(relation_name, options={})
         self.relations ||= Module.new
-
-        self.relations.module_eval do
-          define_method(relation_name) do
-            relation_name.to_s.camelize.constantize.where("#{self.class.name.underscore}_id".to_sym => self.id).first
-          end
-
-          define_method("#{relation_name}=") do |value|
-            value.update_attribute("#{self.class.name.underscore}_id".to_sym, self.id)
-          end
-        end
+        ORM::Associations::HasMany.has_many(self, relation_name, options)
       end
 
-      def belongs_to(relation_name)
-        raise ORM::ModelError, 'belongs_to relation should have model singular name' if relation_name.to_s == relation_name.to_s.pluralize
-
+      def has_one(relation_name, options={})
         self.relations ||= Module.new
+        ORM::Associations::HasOne.has_one(self, relation_name, options)
+      end
 
-        self.relations.module_eval do
-          define_method(relation_name) do
-            relation_name.to_s.camelize.constantize.find(self.send("#{relation_name}_id"))
-          end
-
-          define_method("#{relation_name}=") do |value|
-            self.update_attribute("#{relation_name}_id".to_sym, value.id)
-          end
-        end
+      def belongs_to(relation_name, options={})
+        self.relations ||= Module.new
+        ORM::Associations::BelongsTo.belongs_to(self, relation_name, options)
       end
 
       def objects_array(obj)
@@ -155,8 +140,7 @@ module ORM
 end
 
 #TODO:
-# 1) implement relation between tables
-# 2) implement validation functionality
+# 1) implement validation functionality
 
 #TODO: I will need this for validation
 # :string && :text = String = "string"
