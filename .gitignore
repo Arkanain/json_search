@@ -10,3 +10,5 @@
 
 # Ignore IDE files
 .idea/*
+
+/app/services/models/test.rb
