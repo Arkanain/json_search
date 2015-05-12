@@ -62,10 +62,6 @@ module ORM
           end
         end
 
-        #def as
-        #
-        #end
-
         #def dependent
         #
         #end

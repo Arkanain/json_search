@@ -22,15 +22,7 @@ module ORM
           CODE
         end
 
-        #def polymorphic
-        #
-        #end
-
         #def dependent
-        #
-        #end
-
-        #def foreign_type
         #
         #end
 

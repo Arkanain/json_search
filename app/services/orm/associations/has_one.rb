@@ -57,10 +57,6 @@ module ORM
           end
         end
 
-        #def as
-        #
-        #end
-
         def order_key
           @options[:order].present? ? @options[:order].to_sym : :id
         end
