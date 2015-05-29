@@ -8,7 +8,9 @@ module ORM
       if new_record
         self.created_at = Time.now.utc.to_s
         self.updated_at = Time.now.utc.to_s
-        db_connection.create_row({id: db_connection.counter + 1}.merge!(self.attributes))
+        db_connection.create_row({
+          id: db_connection.counter + 1
+        }.merge!(self.attributes) { |key, old_val, new_val| new_val.nil? ? old_val : new_val })
       else
         self.updated_at = Time.now.utc.to_s
         db_connection.update_row(self.attributes)
@@ -45,57 +47,19 @@ module ORM
       end
 
       def all
-        self::ActiveRelation.new(self, json_table)
+        self::ActiveRelation.new(self)
       end
 
       def find(id)
-        raise ORM::ActiveRecordError, "Couldn't find #{self} without id." if id.blank?
-
-        obj = json_table.find { |e| e[:id] == id.to_i }
-
-        raise ORM::ActiveRecordError, "Couldn't find #{self} with id #{id}" if obj.blank?
-
-        new(obj)
+        self::ActiveRelation.new(self).find(id)
       end
 
-      def where(hash, collection = nil)
-        obj = collection || json_table
-
-        hash.each do |key, value|
-          case
-            when value.is_a?(String)
-              negative = value.first == '-'
-              temp_value = negative ? value[1..value.length] : value
-
-              obj = obj.select { |e| negative ^ e[key].downcase.include?(temp_value.downcase) }
-            when value.is_a?(Array)
-              obj = obj.select { |e| value.include?(e[key]) }
-            else
-              obj = obj.select { |e| e[key] == value }
-          end
-        end
-
-        self::ActiveRelation.new(self, obj)
+      def where(hash)
+        self::ActiveRelation.new(self).where(hash)
       end
 
-      def matches(string, fields, collection = nil)
-        results = []
-        objects = collection || json_table
-
-        objects.each do |lang|
-          approved = false
-
-          fields.each do |field|
-            unless approved
-              substrings = string.downcase.split(' ')
-              approved = substrings.all? { |substr| lang[field].downcase.include?(substr) }
-
-              results << lang if approved
-            end
-          end
-        end
-
-        self::ActiveRelation.new(self, results)
+      def matches(string, fields)
+        self::ActiveRelation.new(self).matches(string, fields)
       end
 
       def create(hash)
@@ -109,31 +73,6 @@ module ORM
         self.scopes.module_eval do
           define_method(name.to_sym, &lambda)
         end
-      end
-
-      def has_many(relation_name, options={})
-        self.relations ||= Module.new
-        ORM::Associations::HasMany.has_many(self, relation_name, options)
-      end
-
-      def has_one(relation_name, options={})
-        self.relations ||= Module.new
-        ORM::Associations::HasOne.has_one(self, relation_name, options)
-      end
-
-      def belongs_to(relation_name, options={})
-        self.relations ||= Module.new
-        ORM::Associations::BelongsTo.belongs_to(self, relation_name, options)
-      end
-
-      def objects_array(obj)
-        obj.inject([]){ |result, lang_hash| result << new(lang_hash) }
-      end
-
-      private
-
-      def json_table
-        ORM::DBConnection.new(self).table
       end
     end
   end
