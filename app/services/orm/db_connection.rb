@@ -2,6 +2,13 @@ module ORM
   class DBConnection
     attr_accessor :table
 
+    def initialize(caller_model)
+      @table_name = caller_model.name.underscore.pluralize.to_sym
+      @table_path = "app/services/db/tables/#{@table_name}.json"
+
+      raise ORM::DBError, "Table #{@table_name} doesn't exist." unless File.exist?(@table_path)
+    end
+
     class << self
       # Return DB structure from database.json
       def db_structure
@@ -56,13 +63,6 @@ module ORM
             raise FieldTypeError, 'Invalid field type.'
         end
       end
-    end
-
-    def initialize(caller_model)
-      @table_name = caller_model.name.underscore.pluralize.to_sym
-      @table_path = "app/services/db/tables/#{@table_name}.json"
-
-      raise ORM::DBError, "Table #{@table_name} doesn't exist." unless File.exist?(@table_path)
     end
 
     # Functionality to work with adding row to DB

@@ -2,6 +2,8 @@ module ORM
   module Associations
     class HasMany < CollectionAssociation
       class << self
+        attr_reader :relation_name, :options, :current_object
+
         def has_many(current_object, relation_name, options={})
           @relation_name = relation_name.to_s
           @options = options
@@ -46,10 +48,14 @@ module ORM
           else
             @current_object.relations.module_eval <<-CODE
               define_method("#{@relation_name}") do
-                rows = #{class_name}.where(#{foreign_key}: self.#{primary_key}).order(:#{order_key})
+                ORM::Associations::CollectionProxy.new(self, #{self})
               end
 
               define_method("#{@relation_name}=") do |values|
+                ORM::Associations::CollectionProxy.new(self, #{self}).each do |row|
+                  row.update_attribute(:#{foreign_key}, nil)
+                end
+
                 values.each do |row|
                   unless row.is_a?(#{class_name})
                     raise ORM::ModelError, "One of objects which you try to assign is not a type of #{class_name}."
@@ -61,6 +67,8 @@ module ORM
             CODE
           end
         end
+
+        #{class_name}.where(#{foreign_key}: self.#{primary_key}).order(:#{order_key})
 
         #def dependent
         #

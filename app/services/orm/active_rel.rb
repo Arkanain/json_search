@@ -4,9 +4,13 @@ module ORM
 
     def initialize(type)
       self.type = type
-      self.collection ||= json_table
-
       self.class.include self.type.scopes if self.type.scopes.present?
+
+      self.collection ||= json_table
+    end
+
+    def create(hash)
+      type.new(hash).save
     end
 
     def matches(string, fields)
@@ -74,14 +78,11 @@ module ORM
       to_a.map(&:attributes).include?(record.attributes)
     end
 
-    {
-      'first' => '',
-      'last' => '',
-      'length' => '',
-      'size' => '',
-      'count' => '',
-      'empty?' => ''
-    }.each do |name, params|
+    def all
+      self
+    end
+
+    [:first, :last, :length, :size, :count, :empty?].each do |name, params|
       instance_eval <<-CODE
         define_method("#{name}") do |#{params}|
           to_a.#{name}(#{params})
@@ -89,7 +90,7 @@ module ORM
       CODE
     end
 
-    %w{each map}.each do |name|
+    [:each, :map].each do |name|
       instance_eval <<-CODE
         define_method("#{name}") do |*args, &block|
           to_a.send(name, *args, &block)

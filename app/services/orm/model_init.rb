@@ -71,7 +71,7 @@ module ORM
       # There we setup few basical fields
       # attributes - for model attributes
       # column_types - for model column and their types
-      # new_record - boolean value which tell as is we work with newly created model or not
+      # new_record - boolean value which tell us is we work with newly created model or not
       model.instance_eval do
         attr_reader :attributes, :column_types, :new_record
 
@@ -83,7 +83,7 @@ module ORM
           attributes[:id].to_s
         end
 
-        # This method need for form_for to generate different id and url options depends on :id parametr
+        # This method need for form_for to generate different id and url options depends on :id parameter
         define_method(:to_key) do
           [attributes[:id]] if attributes[:id]
         end

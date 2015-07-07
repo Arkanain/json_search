@@ -1,5 +1,8 @@
 class Author < ORM::ActiveRecord
-  belongs_to :language
+  #belongs_to :language
+
+  has_many :language_authors
+  has_many :languages, through: :language_authors
 
   #has_many :language_authors
   #has_many :languages, through: :language_authors, order: :name
