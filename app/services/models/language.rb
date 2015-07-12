@@ -1,5 +1,5 @@
 class Language < ORM::ActiveRecord
-  #scope :by_name, -> (name) { where(name: name) }
+  scope :by_name, -> (name) { where(name: name) }
 
   #has_many :authors
 

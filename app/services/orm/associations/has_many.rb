@@ -2,7 +2,7 @@ module ORM
   module Associations
     class HasMany < CollectionAssociation
       class << self
-        attr_reader :relation_name, :options, :current_object
+        attr_reader :relation_name, :options, :current_object, :relation_hash
 
         def has_many(current_object, relation_name, options={})
           @relation_name = relation_name.to_s
@@ -21,14 +21,23 @@ module ORM
             #If we have :through option then let's define special method for it
             define_through_options
 
-            @current_object.relations.module_eval <<-CODE
-              define_method("#{@relation_name}") do
-                #{@options[:through]} = #{related_table}.where(#{foreign_key}: self.#{primary_key})
+            @relation_hash = {
+              through: @options[:through].present?,
+              foreign_key: foreign_key,
+              primary_key: primary_key,
+              order_key: order_key,
+              source_type: source_type,
+              source_key: source_key,
+              related_table: related_table,
+              class_name: class_name
+            }
 
-                #{source_type}.where(id: #{@options[:through]}.order(:#{order_key}).map(&:#{source_key}))
+            @current_object.class_eval <<-CODE
+              def #{@relation_name}
+                ORM::Associations::CollectionProxy.new(self, #{relation_hash})
               end
 
-              define_method("#{@relation_name}=") do |values|
+              def #{@relation_name}=(values)
                 values = [values] unless values.is_a?(Array)
 
                 values.each do |value|
@@ -46,12 +55,20 @@ module ORM
               end
             CODE
           else
-            @current_object.relations.module_eval <<-CODE
-              define_method("#{@relation_name}") do
-                ORM::Associations::CollectionProxy.new(self, #{self})
+            @relation_hash = {
+              through: @options[:through].present?,
+              foreign_key: foreign_key,
+              primary_key: primary_key,
+              order_key: order_key,
+              class_name: class_name
+            }
+
+            @current_object.class_eval <<-CODE
+              def #{@relation_name}
+                ORM::Associations::CollectionProxy.new(self, #{relation_hash})
               end
 
-              define_method("#{@relation_name}=") do |values|
+              def #{@relation_name}=(values)
                 ORM::Associations::CollectionProxy.new(self, #{self}).each do |row|
                   row.update_attribute(:#{foreign_key}, nil)
                 end
@@ -67,8 +84,6 @@ module ORM
             CODE
           end
         end
-
-        #{class_name}.where(#{foreign_key}: self.#{primary_key}).order(:#{order_key})
 
         #def dependent
         #

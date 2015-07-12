@@ -3,7 +3,6 @@ module ORM
     attr_accessor :relations
 
     def has_many(relation_name, options={})
-      self.relations ||= Module.new
       ORM::Associations::HasMany.has_many(self, relation_name, options)
     end
 

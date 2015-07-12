@@ -2,27 +2,32 @@ module ORM
   module Associations
     class CollectionProxy
       attr_accessor :collection
-      attr_reader :caller_object, :assoc, :type
+      attr_reader :caller_object, :assoc_hash, :type
 
-      def initialize(caller_object, assoc)
-        @assoc = assoc
+      def initialize(caller_object, assoc_hash)
+        @assoc_hash = assoc_hash
         @caller_object = caller_object
 
-        if assoc.options[:through]
-          @type = assoc.source_type.constantize
+        if assoc_hash[:through]
+          @type = assoc_hash[:source_type].constantize
 
-          through_results = assoc.related_table.constantize.where(assoc.foreign_key => caller_object.send(assoc.primary_key))
-          self.collection = where(id: through_results.order(assoc.order_key.to_sym).map { |row| row.send(assoc.source_key) })
+          through_results = assoc_hash[:related_table].constantize
+            .where(assoc_hash[:foreign_key] => caller_object.send(assoc_hash[:primary_key]))
+            .order(assoc_hash[:order_key].to_sym)
+            .map { |row| row.send(assoc_hash[:source_key]) }
+
+          self.collection = where({ id: through_results }, json_table).collection
         else
-          @type = assoc.class_name.constantize
-          self.collection = where({ assoc.foreign_key => caller_object.send(assoc.primary_key) }, json_table).order(assoc.order_key).collection
+          @type = assoc_hash[:class_name].constantize
+
+          self.collection = where({ assoc_hash[:foreign_key] => caller_object.send(assoc_hash[:primary_key]) }, json_table).order(assoc_hash[:order_key]).collection
         end
 
         self.class.include self.type.scopes if self.type.scopes.present?
       end
 
       def create(hash)
-        hash = hash.merge(assoc.foreign_key => caller_object.send(assoc.primary_key))
+        hash = hash.merge(assoc_hash[:foreign_key] => caller_object.send(assoc_hash[:primary_key]))
         type.new(hash).save
       end
 
@@ -87,9 +92,23 @@ module ORM
         self
       end
 
-      #def <<(records)
-      #  puts 123
-      #end
+      def <<(records)
+        records = [records] unless records.is_a?(Array)
+
+        records.each do |record|
+          next if collection.include?(record.attributes)
+
+          if assoc_hash[:through]
+            assoc_hash[:related_table].constantize.create(assoc_hash[:source_key] => record.id, assoc_hash[:foreign_key] => caller_object.id)
+          else
+            record.send("#{assoc_hash[:foreign_key]}=", caller_object.id)
+            record.save
+          end
+        end
+
+        self.collection += records.map(&:attributes)
+        self
+      end
 
       def include?(record)
         to_a.map(&:attributes).include?(record.attributes)
