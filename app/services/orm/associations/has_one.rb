@@ -2,6 +2,8 @@ module ORM
   module Associations
     class HasOne < SingularAssociation
       class << self
+        attr_reader :relation_name, :options, :current_object, :relation_hash
+
         def has_one(current_object, relation_name, options={})
           @relation_name = relation_name.to_s
           @options = options
@@ -15,11 +17,27 @@ module ORM
             raise ORM::ModelError, "Can't find class which is specified for :source_type option for relation has_many :#{@relation_name} in #{self} model"
           end
 
+          #This hash is needed to pass params inside class eval and prevent problems with overload
+          @relation_hash = {
+            through: @options[:through].present?,
+            foreign_key: foreign_key,
+            primary_key: primary_key,
+            order_key: order_key,
+            class_name: class_name
+          }
+
           if @options[:through].present?
             #If we have :through option then let's define special method for it
             define_through_options
 
-            @current_object.relations.module_eval <<-CODE
+            @relation_hash.merge!(
+              source_type: source_type,
+              source_key: source_key,
+              related_table: related_table
+            )
+
+            #TODO ПЕРЕПИСЫВАЕМ СНАЧАЛА ЭТО
+            @current_object.class_eval <<-CODE
               define_method("#{@relation_name}") do
                 #{@options[:through]} = #{related_table}.where(#{foreign_key}: self.#{primary_key})
 
@@ -41,9 +59,9 @@ module ORM
               end
             CODE
           else
-            @current_object.relations.module_eval <<-CODE
+            @current_object.class_eval <<-CODE
               define_method("#{@relation_name}") do
-                #{class_name}.where(#{foreign_key}: self.#{primary_key}).order(:#{order_key}).first
+                ORM::Associations::CollectionProxy.new(self, #{relation_hash}).first
               end
 
               define_method("#{@relation_name}=") do |value|

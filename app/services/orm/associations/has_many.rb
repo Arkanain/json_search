@@ -17,20 +17,24 @@ module ORM
             raise ORM::ModelError, "Can't find class which is specified for :source_type option for relation has_many :#{@relation_name} in #{self} model"
           end
 
+          #This hash is needed to pass params inside class eval and prevent problems with overload
+          @relation_hash = {
+            through: @options[:through].present?,
+            foreign_key: foreign_key,
+            primary_key: primary_key,
+            order_key: order_key,
+            class_name: class_name
+          }
+
           if @options[:through].present?
             #If we have :through option then let's define special method for it
             define_through_options
 
-            @relation_hash = {
-              through: @options[:through].present?,
-              foreign_key: foreign_key,
-              primary_key: primary_key,
-              order_key: order_key,
+            @relation_hash.merge!(
               source_type: source_type,
               source_key: source_key,
-              related_table: related_table,
-              class_name: class_name
-            }
+              related_table: related_table
+            )
 
             @current_object.class_eval <<-CODE
               def #{@relation_name}
@@ -41,28 +45,27 @@ module ORM
                 values = [values] unless values.is_a?(Array)
 
                 values.each do |value|
-                  unless value.is_a?(#{source_type})
-                    raise ORM::ModelError, "One of object which you try to assign is not a type of #{source_type}."
+                  unless value.is_a?(#{relation_hash[:source_type]})
+                    raise ORM::ModelError, "One of object which you try to assign is not a type of #{relation_hash[:source_type]}."
                   end
                 end
 
-                #{@options[:through]} = #{related_table}.where(#{foreign_key}: self.#{primary_key}).map(&:#{source_key})
+                #{@options[:through]} = #{relation_hash[:related_table]}.where(
+                  #{relation_hash[:foreign_key]}: self.#{relation_hash[:primary_key]}
+                ).map(&:#{relation_hash[:source_key]})
+
+                #{relation_hash[:related_table]}.where(#{relation_hash[:foreign_key]}: self.#{relation_hash[:primary_key]}).destroy_all
 
                 new_rows = values.map(&:id) - #{@options[:through]}
                 new_rows.each do |row_id|
-                  #{related_table}.create(#{foreign_key}: self.#{primary_key}, #{source_key}: row_id)
+                  #{relation_hash[:related_table]}.create(
+                    #{relation_hash[:foreign_key]}: self.#{relation_hash[:primary_key]},
+                    #{relation_hash[:source_key]}: row_id
+                  )
                 end
               end
             CODE
           else
-            @relation_hash = {
-              through: @options[:through].present?,
-              foreign_key: foreign_key,
-              primary_key: primary_key,
-              order_key: order_key,
-              class_name: class_name
-            }
-
             @current_object.class_eval <<-CODE
               def #{@relation_name}
                 ORM::Associations::CollectionProxy.new(self, #{relation_hash})
@@ -70,15 +73,15 @@ module ORM
 
               def #{@relation_name}=(values)
                 ORM::Associations::CollectionProxy.new(self, #{self}).each do |row|
-                  row.update_attribute(:#{foreign_key}, nil)
+                  row.update_attribute(:#{relation_hash[:foreign_key]}, nil)
                 end
 
                 values.each do |row|
-                  unless row.is_a?(#{class_name})
-                    raise ORM::ModelError, "One of objects which you try to assign is not a type of #{class_name}."
+                  unless row.is_a?(#{relation_hash[:class_name]})
+                    raise ORM::ModelError, "One of objects which you try to assign is not a type of #{relation_hash[:class_name]}."
                   end
 
-                  row.update_attribute(:#{foreign_key}, self.#{primary_key})
+                  row.update_attribute(:#{relation_hash[:foreign_key]}, self.#{relation_hash[:primary_key]})
                 end
               end
             CODE

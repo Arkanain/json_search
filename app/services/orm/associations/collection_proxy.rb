@@ -110,6 +110,20 @@ module ORM
         self
       end
 
+      def destroy_all
+        if assoc_hash[:through]
+          self.collection.each do |row|
+            db_connection = ORM::DBConnection.new(assoc_hash[:related_table].constantize)
+            through_row = assoc_hash[:related_table].constantize.where(assoc_hash[:source_key] => row[:id]).first
+            db_connection.delete_row(through_row.attributes)
+          end
+
+          self.collection = []
+        end
+
+        self
+      end
+
       def include?(record)
         to_a.map(&:attributes).include?(record.attributes)
       end

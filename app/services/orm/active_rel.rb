@@ -82,7 +82,17 @@ module ORM
       self
     end
 
-    [:first, :last, :length, :size, :count, :empty?].each do |name, params|
+    def destroy_all
+      self.collection.each do |row|
+        db_connection = ORM::DBConnection.new(self.type)
+        db_connection.delete_row(row)
+      end
+
+      self.collection = []
+      self
+    end
+
+    [:first, :last, :length, :size, :count, :empty?, [:[], '*args']].each do |name, params|
       instance_eval <<-CODE
         define_method("#{name}") do |#{params}|
           to_a.#{name}(#{params})

@@ -7,7 +7,6 @@ module ORM
     end
 
     def has_one(relation_name, options={})
-      self.relations ||= Module.new
       ORM::Associations::HasOne.has_one(self, relation_name, options)
     end
 
